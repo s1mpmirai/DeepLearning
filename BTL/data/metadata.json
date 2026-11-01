@@ -1,0 +1,42 @@
+{
+  "seed": 42,
+  "rng": "numpy.random.default_rng",
+  "generation_order": [
+    "train_pool",
+    "val",
+    "test"
+  ],
+  "sizes": {
+    "train_pool": 2000,
+    "val": 200,
+    "test": 100
+  },
+  "mu": [
+    0.0,
+    0.0
+  ],
+  "cov": [
+    [
+      0.3,
+      -0.5
+    ],
+    [
+      -0.5,
+      2.0
+    ]
+  ],
+  "x1_range": [
+    -2.0,
+    2.0
+  ],
+  "x2_range": [
+    -4.0,
+    4.0
+  ],
+  "sampling": "uniform",
+  "md5": {
+    "train_pool.csv": "d5002417dfd0b7b9020167e67289c261",
+    "val.csv": "386275d59879c9907ff47402e70fd350",
+    "test.csv": "36871f529de6b7182f2c23674de368ee"
+  }
+}
