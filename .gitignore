@@ -1,0 +1,12 @@
+/*.py
+/*.png
+/*.jpg
+/*.jpeg
+
+~$*
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+Thumbs.db
+desktop.ini
+.vscode/
