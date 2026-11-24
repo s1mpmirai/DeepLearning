@@ -1,8 +1,8 @@
-# TRI THỨC CỐT LÕI HỌC SÂU (DEEP LEARNING) — TỔNG HỢP 7 TUẦN
+# TRI THỨC CỐT LÕI HỌC SÂU (DEEP LEARNING) — TỔNG HỢP 11 TUẦN
 
 > **Kho tri thức tổng hợp toàn diện (Comprehensive Knowledge Base)**  
 > **Chương trình:** Học sâu (Deep Learning) — Đại học Sài Gòn (SGU)  
-> **Mục tiêu:** Hệ thống hóa toàn bộ lý thuyết, công thức toán học, thuật toán, kiến trúc mô hình, phương pháp tối ưu và thực hành từ Tuần 1 đến Tuần 7 thành tri thức nền tảng chuẩn mực.
+> **Mục tiêu:** Hệ thống hóa toàn bộ lý thuyết, công thức toán học, thuật toán, kiến trúc mô hình, phương pháp tối ưu và thực hành từ Tuần 1 đến Tuần 11 thành tri thức nền tảng chuẩn mực.
 
 ---
 
@@ -51,6 +51,30 @@
    - 7.4. Vai trò của Hàm kích hoạt phi tuyến & Định lý Xấp xỉ Phổ quát (Universal Approximation Theorem)
    - 7.5. Khảo sát các hàm kích hoạt (Sigmoid, Tanh, ReLU, Leaky ReLU, Softmax)
    - 7.6. Thuật toán Lan truyền ngược (Backpropagation Algorithm) — Chi tiết Toán học
+8. [TUẦN 8: HUẤN LUYỆN MẠNG NƠ-RON SÂU (DEEP MLP) & BATCH GRADIENT DESCENT (BGD)](#tuần-8-huấn-luyện-mạng-nơ-ron-sâu-deep-mlp--batch-gradient-descent-bgd)
+   - 8.1. Cơ chế lan truyền xuôi và ngược trên toàn bộ tập dữ liệu (Batch Training)
+   - 8.2. Ma trận hóa và Tensor hóa tính toán trong MLP
+   - 8.3. Khảo sát động học hội tụ của Batch Gradient Descent (BGD)
+   - 8.4. Phân tích chi phí bộ nhớ và độ phức tạp tính toán
+9. [TUẦN 9: ĐIỀU NGHỆ HÓA (REGULARIZATION) & THUẬT TOÁN TỐI ƯU HÓA NÂNG CAO (OPTIMIZATION)](#tuần-9-điều-nghệ-hóa-regularization--thuật-toán-tối-ưu-hóa-nâng-cao-optimization)
+   - 9.1. Hiện tượng Overfitting và Nguyên lý Điều nghệ hóa (Regularization)
+   - 9.2. L2 Regularization (Weight Decay / Ridge) và L1 Regularization (Lasso / Sparsity)
+   - 9.3. Kỹ thuật Dropout (Srivastava et al., 2014) và Tăng cường Dữ liệu (Data Augmentation)
+   - 9.4. Dừng sớm (Early Stopping) và Chuẩn hóa theo Lô (Batch Normalization)
+   - 9.5. Các giải thuật tối ưu hóa thích ứng: Momentum, Nesterov, RMSprop, Adam
+10. [TUẦN 10: MẠNG NƠ-RON TÍCH CHẬP (CONVOLUTIONAL NEURAL NETWORKS - CNN)](#tuần-10-mạng-nơ-ron-tích-chập-convolutional-neural-networks---cnn)
+   - 10.1. Nguyên lý Tích chập (Convolution), Chia sẻ Trọng số (Weight Sharing) và Bất biến Tịnh tiến
+   - 10.2. Không gian Receptive Field, Stride, Padding (Valid vs Same) và Công thức Kích thước Khối
+   - 10.3. Các lớp Gộp (Pooling Layers: Max Pooling, Average Pooling, Global Average Pooling)
+   - 10.4. Tính toán Tham số (Weight & Bias Count) và Bộ nhớ trong CNN
+   - 10.5. Các kiến trúc CNN kinh điển: LeNet, AlexNet, VGG, ResNet, GoogLeNet
+11. [TUẦN 11: MẠNG NƠ-RON HỒI QUY (RECURRENT NEURAL NETWORKS - RNN) & TỐI ƯU HÓA STOCHASTIC GRADIENT DESCENT (SGD)](#tuần-11-mạng-nơ-ron-hồi-quy-recurrent-neural-networks---rnn--tối-ưu-hóa-stochastic-gradient-descent-sgd)
+   - 11.1. Bản chất dữ liệu tuần tự & Kiến trúc mạng RNN cơ bản (Vanilla RNN)
+   - 11.2. Lan truyền thuận theo bước thời gian & Cập nhật trạng thái ẩn ($h_t$)
+   - 11.3. Thuật toán Lan truyền ngược theo thời gian (Backpropagation Through Time - BPTT)
+   - 11.4. Vấn đề Triệt tiêu và Bùng nổ Gradient (Vanishing & Exploding Gradients) và Giải pháp LSTM/GRU
+   - 11.5. Động học hội tụ của Stochastic Gradient Descent (SGD) so với Batch GD và Mini-batch GD
+
    - 7.7. Triển khai Mạng MLP với PyTorch `nn.Module`
 8. [BẢN ĐỒ LIÊN KẾT TRI THỨC VÀ HỆ THỐNG CÔNG THỨC TOÁN HỌC CỐT LÕI](#bản-đồ-liên-kết-tri-thức-và-hệ-thống-công-thức-toán-học-cốt-lõi)
 
@@ -650,9 +674,164 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 ---
 
+---
+
+## TUẦN 8: HUẤN LUYỆN MẠNG NƠ-RON SÂU (DEEP MLP) & BATCH GRADIENT DESCENT (BGD)
+
+### 8.1. Cơ chế Huấn luyện theo Lô Toàn phần (Batch Gradient Descent - BGD)
+Trong Batch Gradient Descent, gradient của hàm mục tiêu được tính toán dựa trên toàn bộ $N$ mẫu của tập dữ liệu huấn luyện $\mathcal{D} = \{(\mathbf{x}^{(i)}, y^{(i)})\}_{i=1}^N$ trước khi thực hiện đúng một lần cập nhật trọng số:
+$$J(\mathbf{W}, \mathbf{b}) = rac{1}{N} \sum_{i=1}^N L\left(f(\mathbf{x}^{(i)}; \mathbf{W}, \mathbf{b}), y^{(i)}ight)$$
+$$\mathbf{W} \leftarrow \mathbf{W} - \eta 
+abla_{\mathbf{W}} J(\mathbf{W}, \mathbf{b}) = \mathbf{W} - \eta \left( rac{1}{N} \sum_{i=1}^N 
+abla_{\mathbf{W}} L^{(i)} ight)$$
+
+#### Đặc tính động học của BGD:
+- **Quỹ đạo mượt mà (Smooth Trajectory):** Gradient tại mỗi bước là ước lượng không chệch (unbiased) và chính xác tuyệt đối của độ dốc hàm mất mát trên toàn tập huấn luyện, do đó quỹ đạo di chuyển đi thẳng về điểm cực trị mà không bị dao động zigzag ngẫu nhiên.
+- **Hội tụ xác định (Deterministic Convergence):** Đảm bảo hội tụ tới điểm cực tiểu toàn cục đối với hàm lồi (convex) và điểm dừng/cực tiểu địa phương đối với hàm phi lồi (non-convex).
+- **Hạn chế:** Không thể xử lý dữ liệu streaming (trực tuyến) và đòi hỏi nạp toàn bộ dữ liệu vào bộ nhớ RAM/VRAM, dễ gây tràn bộ nhớ (Out-Of-Memory) khi $N$ lên tới hàng triệu mẫu.
+
+### 8.2. Ma trận hóa và Tensor hóa trong Mạng Nơ-ron Nhiều Tầng
+Để tối ưu hóa tính toán trên phần cứng GPU song song, dữ liệu $N$ mẫu được gom thành ma trận $\mathbf{X} \in \mathbb{R}^{N 	imes d_{	ext{in}}}$.
+- Lan truyền xuôi tầng $l$:
+  $$\mathbf{Z}^{[l]} = \mathbf{A}^{[l-1]} (\mathbf{W}^{[l]})^T + \mathbf{1}_N (\mathbf{b}^{[l]})^T \in \mathbb{R}^{N 	imes n_l}$$
+  $$\mathbf{A}^{[l]} = g^{[l]}(\mathbf{Z}^{[l]})$$
+- Gradient ma trận trong lan truyền ngược:
+  $$rac{\partial J}{\partial \mathbf{W}^{[l]}} = rac{1}{N} (oldsymbol{\Delta}^{[l]})^T \mathbf{A}^{[l-1]}$$
+  $$rac{\partial J}{\partial \mathbf{b}^{[l]}} = rac{1}{N} (oldsymbol{\Delta}^{[l]})^T \mathbf{1}_N$$
+  với $oldsymbol{\Delta}^{[l]} = rac{\partial J}{\partial \mathbf{Z}^{[l]}} \in \mathbb{R}^{N 	imes n_l}$.
+
+---
+
+## TUẦN 9: ĐIỀU NGHỆ HÓA (REGULARIZATION) & THUẬT TOÁN TỐI ƯU HÓA NÂNG CAO (OPTIMIZATION)
+
+### 9.1. Hiện tượng Overfitting và Bản chất Điều nghệ hóa
+Overfitting xảy ra khi mô hình có dung lượng (capacity) quá lớn so với lượng dữ liệu huấn luyện, khiến mô hình học thuộc cả nhiễu (noise) thay vì học quy luật tổng quát. Điều nghệ hóa (Regularization) là tập hợp các kỹ thuật can thiệp vào cấu trúc mô hình, hàm mục tiêu hoặc quy trình huấn luyện nhằm giảm sai số kiểm định (generalization error) mà không làm tăng đáng kể sai số huấn luyện.
+
+### 9.2. Các Phương pháp Phạt Độ phức tạp (Weight Decay)
+#### 1. L2 Regularization (Ridge / Tikhonov):
+Cộng thêm số hạng chuẩn Frobenius bậc hai của ma trận trọng số vào hàm mục tiêu:
+$$J_{	ext{reg}}(\mathbf{W}) = J_0(\mathbf{W}) + rac{\lambda}{2} \|\mathbf{W}\|_2^2 = J_0(\mathbf{W}) + rac{\lambda}{2} \sum_j w_j^2$$
+Bước cập nhật trọng số trở thành:
+$$\mathbf{W} \leftarrow \mathbf{W} - \eta \left( 
+abla_{\mathbf{W}} J_0 + \lambda \mathbf{W} ight) = (1 - \eta \lambda) \mathbf{W} - \eta 
+abla_{\mathbf{W}} J_0$$
+Hệ số $(1 - \eta \lambda) < 1$ thu nhỏ độ lớn của mọi trọng số tại mỗi bước lặp (Weight Decay), ngăn chặn việc mô hình dựa dẫm quá mức vào một vài đặc trưng đơn lẻ.
+
+#### 2. L1 Regularization (Lasso):
+$$J_{	ext{reg}}(\mathbf{W}) = J_0(\mathbf{W}) + \lambda \|\mathbf{W}\|_1 = J_0(\mathbf{W}) + \lambda \sum_j |w_j|$$
+$$
+abla_{\mathbf{W}} J_{	ext{reg}} = 
+abla_{\mathbf{W}} J_0 + \lambda \operatorname{sign}(\mathbf{W})$$
+L1 ép các trọng số không quan trọng về đúng bằng 0, tạo ra ma trận trọng số thưa (sparse weights) và đóng vai trò như một cơ chế chọn lọc đặc trưng tự động (feature selection).
+
+### 9.3. Kỹ thuật Dropout (Srivastava et al., 2014)
+- **Cơ chế huấn luyện:** Tại mỗi bước huấn luyện, mỗi nơ-ron (ở tầng ẩn) bị tạm thời ngắt kết nối với xác suất $p$ (hoặc giữ lại với xác suất $1-p$).
+  $$\mathbf{r}^{[l]} \sim \operatorname{Bernoulli}(1 - p)$$
+  $$	ilde{\mathbf{a}}^{[l]} = rac{1}{1 - p} \left( \mathbf{a}^{[l]} \odot \mathbf{r}^{[l]} ight) \quad 	ext{(Inverted Dropout)}$$
+- **Bản chất:** Phá vỡ sự đồng thích nghi (co-adaptation) giữa các nơ-ron, buộc từng nơ-ron phải học những đặc trưng độc lập và bền bỉ. Ở góc độ ensemble, Dropout xấp xỉ việc kết hợp trung bình trọng số của $2^M$ kiến trúc mạng con khác nhau.
+
+### 9.4. Chuẩn hóa theo Lô (Batch Normalization - Ioffe & Szegedy, 2015)
+Chuẩn hóa phân phối đầu vào của mỗi tầng qua từng mini-batch để triệt tiêu hiện tượng dịch chuyển hiệp biến nội bộ (Internal Covariate Shift):
+$$\mu_{\mathcal{B}} = rac{1}{m} \sum_{i=1}^m z^{(i)}, \quad \sigma_{\mathcal{B}}^2 = rac{1}{m} \sum_{i=1}^m (z^{(i)} - \mu_{\mathcal{B}})^2$$
+$$\hat{z}^{(i)} = rac{z^{(i)} - \mu_{\mathcal{B}}}{\sqrt{\sigma_{\mathcal{B}}^2 + \epsilon}}$$
+$$y^{(i)} = \gamma \hat{z}^{(i)} + eta$$
+$\gamma$ (scale) và $eta$ (shift) là các tham số học được giúp khôi phục dung lượng biểu diễn khi cần.
+
+### 9.5. Hệ thống Thuật toán Tối ưu hóa Thích ứng (Adaptive Optimizers)
+| Thuật toán | Công thức Cập nhật Trọng số | Đặc điểm & Cơ chế Cốt lõi |
+|:---|:---|:---|
+| **SGD + Momentum** | $v_t = eta v_{t-1} + \eta 
+abla J$, $\quad 	heta_t = 	heta_{t-1} - v_t$ | Tích lũy quán tính giúp vượt qua vùng phẳng, giảm dao động ở hẻm núi dốc |
+| **Nesterov (NAG)** | $v_t = eta v_{t-1} + \eta 
+abla J(	heta_{t-1} - eta v_{t-1})$, $\quad 	heta_t = 	heta_{t-1} - v_t$ | Đánh giá độ dốc tại vị trí dự đoán tương lai để hãm đà kịp thời |
+| **RMSprop** | $s_t = eta s_{t-1} + (1-eta) g_t^2$, $\quad 	heta_t = 	heta_{t-1} - rac{\eta}{\sqrt{s_t + \epsilon}} g_t$ | Chia tỷ lệ học theo căn bậc hai của bình phương gradient trung bình trượt |
+| **Adam** | $m_t = eta_1 m_{t-1} + (1-eta_1) g_t$, $\quad v_t = eta_2 v_{t-1} + (1-eta_2) g_t^2$<br>$\hat{m}_t = rac{m_t}{1 - eta_1^t}, \quad \hat{v}_t = rac{v_t}{1 - eta_2^t}$, $\quad 	heta_t = 	heta_{t-1} - rac{\eta}{\sqrt{\hat{v}_t} + \epsilon} \hat{m}_t$ | Kết hợp Momentum (moment bậc 1) và RMSprop (moment bậc 2) kèm hiệu chỉnh độ chệch khởi tạo |
+
+---
+
+## TUẦN 10: MẠNG NƠ-RON TÍCH CHẬP (CONVOLUTIONAL NEURAL NETWORKS - CNN)
+
+### 10.1. Nguyên lý Nền tảng của Kiến trúc Tích chập
+Mạng nơ-ron kết nối đầy đủ (FC / MLP) thất bại trên dữ liệu hình ảnh 2D/3D do bùng nổ số lượng tham số và mất mát hoàn toàn tương quan không gian (spatial correlation). CNN giải quyết vấn đề này bằng 3 trụ cột:
+1. **Kết nối cục bộ (Local Receptive Fields):** Mỗi nơ-ron chỉ kết nối tới một vùng không gian nhỏ lân cận kích thước $K 	imes K$ của tầng trước.
+2. **Chia sẻ trọng số (Weight Sharing):** Cùng một bộ lọc (kernel) được trượt trên toàn bộ ảnh, nghĩa là các đặc trưng cơ bản (góc, cạnh) được phát hiện đồng nhất tại mọi vị trí.
+3. **Bất biến tịnh tiến (Translation Equivariance / Invariance):** Sự dịch chuyển vị trí của đối tượng trong không gian đầu vào sẽ dẫn đến sự dịch chuyển tương ứng trong bản đồ đặc trưng đầu ra.
+
+### 10.2. Toán học Phép toán Tích chập 2D Đa kênh
+Với tensor đầu vào $\mathbf{X} \in \mathbb{R}^{H_{	ext{in}} 	imes W_{	ext{in}} 	imes C_{	ext{in}}}$ và bộ lọc thứ $k$ có tensor trọng số $\mathbf{W}^{(k)} \in \mathbb{R}^{K_h 	imes K_w 	imes C_{	ext{in}}}$, bias $b^{(k)}$:
+$$Y^{(k)}[i, j] = \sum_{c=1}^{C_{	ext{in}}} \sum_{m=0}^{K_h - 1} \sum_{n=0}^{K_w - 1} X[i \cdot S + m - P, j \cdot S + n - P, c] * W^{(k)}[m, n, c] + b^{(k)}$$
+
+#### Công thức Kích thước Đầu ra:
+$$H_{	ext{out}} = \left\lfloor rac{H_{	ext{in}} - K_h + 2P}{S} ightfloor + 1$$
+$$W_{	ext{out}} = \left\lfloor rac{W_{	ext{in}} - K_w + 2P}{S} ightfloor + 1$$
+- $P$ là đệm viền (Padding), $S$ là bước trượt (Stride).
+- Nếu $P = 0$: chế độ `valid` (kích thước giảm).
+- Nếu $P = rac{K - 1}{2}$ (với $K$ lẻ) và $S = 1$: chế độ `same` (giữ nguyên kích thước không gian $H_{	ext{out}} = H_{	ext{in}}$).
+
+### 10.3. Các Lớp Gộp (Pooling Layers)
+- **Max Pooling:** Chọn giá trị cực đại trong cửa sổ $F 	imes F$. Giữ lại đặc trưng nổi bật nhất, mang lại tính bất biến đối với các phép biến dạng nhỏ và tịnh tiến.
+- **Average Pooling:** Lấy giá trị trung bình trong cửa sổ, làm mượt đặc trưng.
+- **Global Average Pooling (GAP):** Tính giá trị trung bình trên toàn bộ bản đồ đặc trưng $H 	imes W ightarrow 1 	imes 1 	imes C$, thay thế các tầng Fully Connected cồng kềnh, giảm mạnh hiện tượng overfitting.
+- *Đặc điểm quan trọng:* Lớp Pooling hoàn toàn không có tham số huấn luyện (0 weights).
+
+### 10.4. Công thức Tính Số lượng Tham số trong CNN
+- **Lớp Conv2D:**
+  $$	ext{Parameters} = (K_h * K_w * C_{	ext{in}} + 1) * C_{	ext{out}}$$
+  *(trong đó $K_h * K_w * C_{	ext{in}} * C_{	ext{out}}$ là số trọng số kernel và $C_{	ext{out}}$ là số bias).*
+- **Lớp Dense (sau Flatten):**
+  $$	ext{Parameters} = (D_{	ext{in}} + 1) * D_{	ext{out}}$$
+  với $D_{	ext{in}} = H_{	ext{final}} * W_{	ext{final}} * C_{	ext{final}}$.
+
+---
+
+## TUẦN 11: MẠNG NƠ-RON HỒI QUY (RECURRENT NEURAL NETWORKS - RNN) & TỐI ƯU HÓA STOCHASTIC GRADIENT DESCENT (SGD)
+
+### 11.1. Mạng Nơ-ron Hồi quy (Vanilla RNN)
+Mạng RNN được thiết kế chuyên biệt để xử lý dữ liệu chuỗi có độ dài biến thiên (văn bản, chuỗi thời gian, âm thanh). Khác với mạng truyền thẳng (feedforward), RNN duy trì một bộ nhớ trạng thái ẩn (hidden state) được tái tuần hoàn qua các bước thời gian.
+
+#### Công thức Lan truyền thuận (Forward Pass theo bước thời gian $t$):
+$$\mathbf{a}_t = \mathbf{W}_x \mathbf{x}_t + \mathbf{W}_h \mathbf{h}_{t-1} + \mathbf{b}_h$$
+$$\mathbf{h}_t = 	anh(\mathbf{a}_t)$$
+$$\mathbf{z}_t = \mathbf{W}_y \mathbf{h}_t + \mathbf{b}_y$$
+$$\hat{\mathbf{y}}_t = g(\mathbf{z}_t) \quad (	ext{Sigmoid hoặc Softmax})$$
+- $\mathbf{x}_t \in \mathbb{R}^{d}$: vector đầu vào tại bước $t$.
+- $\mathbf{h}_t \in \mathbb{R}^{h}$: vector trạng thái ẩn tại bước $t$.
+- $\mathbf{W}_x \in \mathbb{R}^{h 	imes d}$: ma trận trọng số đầu vào - trạng thái ẩn.
+- $\mathbf{W}_h \in \mathbb{R}^{h 	imes h}$: ma trận trọng số trạng thái ẩn - trạng thái ẩn (chia sẻ xuyên suốt mọi bước thời gian).
+- $\mathbf{W}_y \in \mathbb{R}^{c 	imes h}$: ma trận trọng số trạng thái ẩn - đầu ra.
+
+### 11.2. Thuật toán Lan truyền ngược theo Thời gian (BPTT - Backpropagation Through Time)
+Để tính đạo hàm theo trọng số tái quy $\mathbf{W}_h$, gradient được cộng dồn ngược qua tất cả các bước thời gian từ $t$ về $1$:
+$$rac{\partial L_t}{\partial \mathbf{W}_h} = \sum_{k=1}^t rac{\partial L_t}{\partial \mathbf{h}_t} rac{\partial \mathbf{h}_t}{\partial \mathbf{h}_k} rac{\partial^+ \mathbf{h}_k}{\partial \mathbf{W}_h}$$
+với ma trận tích Jacobian lan truyền ngược:
+$$rac{\partial \mathbf{h}_t}{\partial \mathbf{h}_k} = \prod_{j=k+1}^t rac{\partial \mathbf{h}_j}{\partial \mathbf{h}_{j-1}} = \prod_{j=k+1}^t \operatorname{diag}\left(1 - \mathbf{h}_j^2ight) \mathbf{W}_h^T$$
+
+### 11.3. Vấn đề Triệt tiêu và Bùng nổ Gradient (Vanishing & Exploding Gradients)
+- **Bùng nổ Gradient (Exploding Gradient):** Khi trị riêng lớn nhất của $\mathbf{W}_h$ thỏa mãn $|\lambda_{\max}| > 1$, tích ma trận qua nhiều bước thời gian tăng theo cấp số nhân $ightarrow$ gradient tiến tới vô cực.
+  *Khắc phục:* Cắt tỉa gradient (Gradient Clipping): $\mathbf{g} \leftarrow rac{	ext{threshold}}{\|\mathbf{g}\|} \mathbf{g}$ khi $\|\mathbf{g}\| > 	ext{threshold}$.
+- **Triệt tiêu Gradient (Vanishing Gradient):** Do $|	anh'| \le 1$ và $|\lambda_{\max}| < 1$, tích qua chuỗi thời gian dài triệt tiêu về 0 khiến mạng mất khả năng ghi nhớ các phụ thuộc xa (Long-term Dependencies).
+  *Khắc phục:* Kiến trúc kiểm soát cổng **LSTM (Long Short-Term Memory)** với ô nhớ tế bào (cell state $C_t$) và 3 cổng (Forget gate, Input gate, Output gate) hoặc **GRU (Gated Recurrent Unit)**.
+
+### 11.4. Động học Hội tụ của Stochastic Gradient Descent (SGD)
+Stochastic Gradient Descent cập nhật trọng số ngay sau từng mẫu đơn lẻ $i$:
+$$\mathbf{w}^{(t+1)} = \mathbf{w}^{(t)} - \eta 
+abla_{\mathbf{w}} L\left(f(\mathbf{x}^{(i)}; \mathbf{w}^{(t)}), y^{(i)}ight)$$
+
+#### So sánh Tổng hợp Ba Chiến lược Gradient Descent:
+| Tiêu chí | Batch Gradient Descent (BGD) | Mini-batch Gradient Descent (MBGD) | Stochastic Gradient Descent (SGD) |
+|:---|:---|:---|:---|
+| **Số mẫu mỗi lần cập nhật** | Toàn bộ $N$ mẫu | Kích thước lô $B \in [16, 512]$ | Đúng $1$ mẫu |
+| **Số lần cập nhật / epoch** | $1$ lần | $\lceil N / B ceil$ lần | $N$ lần |
+| **Độ ổn định của Gradient** | Cực kỳ ổn định, chính xác | Ổn định, phương sai thấp | Rất nhiễu, dao động mạnh |
+| **Khả năng thoát cực tiểu địa phương** | Kém (dễ kẹt ở saddle points) | Rất tốt | Tốt nhất nhờ nhiễu ngẫu nhiên |
+| **Tận dụng phần cứng GPU** | Rất tốt nếu vừa bộ nhớ | Tối ưu hóa cao nhất | Kém (không song song hóa được) |
+| **Phù hợp dữ liệu lớn / streaming** | Không khả thi | Chuẩn mực thực tế phổ biến nhất | Rất tốt cho trực tuyến |
+
+---
+
 ## BẢN ĐỒ LIÊN KẾT TRI THỨC VÀ HỆ THỐNG CÔNG THỨC TOÁN HỌC CỐT LÕI
 
-### 1. Bản đồ Dòng chảy Tri thức (Knowledge Flow: Tuần 1 $\rightarrow$ Tuần 7)
+### 1. Bản đồ Dòng chảy Tri thức (Knowledge Flow: Tuần 1 $\rightarrow$ Tuần 11)
 
 ```
 [Tuần 1: Nền tảng AI & ML]
@@ -677,12 +856,28 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
        +-----------------+------------------+
                          |
                          v
-          [Tuần 7: Perceptron & Mạng Nơ-ron Sâu (MLP)]
-            * Perceptron cổ điển: y = step(w^T x + b) -> Ranh giới siêu phẳng
-            * Bài toán XOR -> Nhu cầu Mạng nhiều tầng (MLP)
-            * Hàm kích hoạt phi tuyến (ReLU, Tanh, Softmax) & Xấp xỉ phổ quát
-            * Thuật toán Lan truyền ngược (Backpropagation: 4 phương trình vàng)
-            * Tối ưu hóa sâu: Momentum, RMSprop, Adam
+       [Tuần 7: Perceptron & Mạng Nơ-ron Sâu (MLP)]
+         * Perceptron cổ điển: y = step(w^T x + b)
+         * Hàm kích hoạt phi tuyến (ReLU, Tanh, Softmax)
+         * Thuật toán Lan truyền ngược (Backprop: 4 phương trình vàng)
+                         |
+                         v
+       [Tuần 8: Huấn luyện Sâu & Batch Gradient Descent (BGD)]
+         * Ma trận hóa & Tensor hóa tính toán
+         * Quỹ đạo mượt mà & Hội tụ tất định
+                         |
+                         v
+       [Tuần 9: Regularization & Optimization Nâng cao]
+         * L1/L2 Weight Decay, Dropout, Batch Normalization
+         * Bộ tối ưu hóa thích ứng: Momentum, RMSprop, Adam
+                         |
+                         +------------------------------------+
+                         |                                    |
+                         v                                    v
+       [Tuần 10: Mạng Tích chập (CNN)]        [Tuần 11: Mạng Hồi quy (RNN) & SGD]
+         * Tích chập 2D/3D & Receptive Field    * Chuỗi thời gian & Bộ nhớ ẩn (h_t)
+         * Weight Sharing & Equivariance        * BPTT & Triệt tiêu Gradient (LSTM)
+         * Pooling & Công thức Tham số          * Động học hội tụ SGD từng mẫu
 ```
 
 ### 2. Bảng Tra cứu Toàn diện Công thức Cốt lõi
@@ -697,6 +892,14 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 | **Gradient theo Trọng số MLP** | $\frac{\partial L}{\partial \mathbf{W}^{[l]}} = \boldsymbol{\delta}^{[l]} (\mathbf{a}^{[l-1]})^T$ | Phục vụ cập nhật $\mathbf{W}^{[l]} \leftarrow \mathbf{W}^{[l]} - \alpha \frac{\partial L}{\partial \mathbf{W}^{[l]}}$ | $\frac{\partial L}{\partial \mathbf{b}^{[l]}} = \boldsymbol{\delta}^{[l]}$ |
 | **Độ chính xác Phân loại** | $F_1 = \frac{2 \cdot P \cdot R}{P + R}$ | Đánh giá phân loại mất cân bằng | $P = \frac{TP}{TP+FP}, \; R = \frac{TP}{TP+FN}$ |
 | **Hệ số Xác định** | $R^2 = 1 - \frac{SS_{res}}{SS_{tot}}$ | Đánh giá độ phù hợp của mô hình hồi quy | $SS_{res} = \sum (y_i - \hat{y}_i)^2$ |
+| **Tích chập 2D (CNN)** | $Y = X * W + b$ | Giảm chiều không gian, trích xuất đặc trưng | $(K_h * K_w * C_{	ext{in}} + 1) * C_{	ext{out}}$ |
+| **Kích thước Lớp Conv** | $O = \lfloor rac{W - K + 2P}{S} floor + 1$ | Tính toán phân giải không gian đặc trưng | Max Pooling: không chứa tham số |
+| **Mạng Hồi quy (RNN)** | $\mathbf{h}_t = 	anh(\mathbf{W}_x \mathbf{x}_t + \mathbf{W}_h \mathbf{h}_{t-1} + \mathbf{b}_h)$ | $\hat{\mathbf{y}}_t = \sigma(\mathbf{W}_y \mathbf{h}_t + \mathbf{b}_y)$ | BPTT: $rac{\partial L}{\partial \mathbf{W}_h} = \sum rac{\partial L}{\partial \mathbf{h}_t} rac{\partial \mathbf{h}_t}{\partial \mathbf{h}_k} rac{\partial^+ \mathbf{h}_k}{\partial \mathbf{W}_h}$ |
+| **Stochastic GD (SGD)** | $\mathbf{w} \leftarrow \mathbf{w} - \eta 
+abla L_i(\mathbf{w})$ | $L_i = (\hat{y}_i - y_i)^2$ hoặc $BCE_i$ | Cập nhật ngay sau mỗi mẫu đơn lẻ |
+| **L2 Regularization** | $J_{	ext{reg}} = J_0 + rac{\lambda}{2}\|\mathbf{w}\|_2^2$ | Chống Overfitting (Weight Decay) | $\mathbf{w} \leftarrow (1 - \eta\lambda)\mathbf{w} - \eta 
+abla J_0$ |
+| **Bộ tối ưu hóa Adam** | $	heta \leftarrow 	heta - rac{\eta}{\sqrt{\hat{v}_t} + \epsilon}\hat{m}_t$ | Tối ưu hóa thích ứng moment bậc 1 & 2 | Tự động thích nghi learning rate theo từng tọa độ |
 
 ---
 *Tài liệu này được tạo tự động và đồng bộ trực tiếp vào cơ sở tri thức hệ thống nhằm phục vụ suy luận, giải toán, thiết kế kiến trúc và gỡ lỗi cho toàn bộ các bài toán Học sâu.*

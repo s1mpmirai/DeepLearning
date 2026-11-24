@@ -1,94 +1,86 @@
-# BTL01 – Xấp xỉ hàm Gaussian 2 chiều bằng MLP (PyTorch)
+# BTL01 - Xấp xỉ hàm Gaussian 2 chiều bằng MLP (PyTorch)
 
-Huấn luyện mạng perceptron đa tầng (MLP) viết bằng PyTorch để xấp xỉ hàm mật độ Gaussian 2 chiều
-
-$$f(\mathbf{x}) = \frac{1}{2\pi\sqrt{\det C}} \exp\left(-\tfrac{1}{2}(\mathbf{x}-\boldsymbol\mu)^T C^{-1}(\mathbf{x}-\boldsymbol\mu)\right),
-\quad \boldsymbol\mu = (0, 0),\ C = \begin{bmatrix}0.3 & -0.5\\ -0.5 & 2\end{bmatrix}$$
-
-trên miền $-2 \le x_1 \le 2$, $-4 \le x_2 \le 4$, rồi khảo sát ảnh hưởng của số mẫu train (A), số nơ-ron tầng ẩn (B) và số tầng ẩn (C).
+Dùng mạng MLP viết bằng PyTorch để xấp xỉ hàm mật độ Gaussian 2 chiều với μ = (0, 0), C = [[0.3, -0.5], [-0.5, 2]] trên miền -2 ≤ x1 ≤ 2, -4 ≤ x2 ≤ 4. Sau đó khảo sát ảnh hưởng của số mẫu train (A), số nơ-ron tầng ẩn (B) và số tầng ẩn (C).
 
 ## Cài đặt
-
-Yêu cầu Python ≥ 3.10. Chạy được trên CPU, GPU là tuỳ chọn.
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Đã chạy thử với Python 3.13.2, numpy 2.4.3, pandas 3.0.1, scipy 1.17.1, matplotlib 3.10.8, torch 2.14.0+cpu.
+Nhóm chạy trên Python 3.13, PyTorch 2.14 (CPU). Không cần GPU.
 
-## Cấu trúc thư mục
+## Thư mục
 
 ```
-BTL/
-├── data/              train_pool.csv, val.csv, test.csv, metadata.json   (TV1)
-├── document/          đề bài, yêu cầu, code và báo cáo mẫu
-├── preprocessing/     gaussian.py, generate_data.ipynb                   (TV1)
-├── eda/               eda.ipynb, bảng thống kê *.csv, figures/           (TV1)
-├── models/            mlp.py, train.py, exp_C.ipynb                      (TV2)
-│                      plots.py, exp_A.ipynb                              (TV3)
-│                      experiment.py, exp_B.ipynb                         (TV4)
-├── exps/              exp_A/, exp_B/, exp_C/: log CSV, runs.csv, summary.csv, .pth, hình
-├── experiments.xlsx   tổng hợp kết quả A, B, C                           (TV1)
-├── Report.docx, Report.pdf                                               (TV1)
-└── Slides.pptx, Slides.pdf                                               (TV4)
+tuan7/
+├── data/            train_pool.csv, val.csv, test.csv, metadata.json
+├── document/        đề bài và tài liệu mẫu
+├── preprocessing/   gaussian.py, generate_data.ipynb
+├── eda/             eda.ipynb, các bảng thống kê .csv, figures/
+├── models/          mlp.py, train.py, plots.py, experiment.py, exp_A/B/C.ipynb
+├── exps/            exp_A/, exp_B/, exp_C/: log, runs.csv, summary.csv, .pth, hình
+├── experiments.xlsx
+├── Report.docx, Report.pdf
+└── Slides.pptx, Slides.pdf
 ```
-
-Mọi notebook tự tìm thư mục gốc `BTL/` nên chạy được từ thư mục gốc hoặc từ chính thư mục chứa notebook. Không dùng đường dẫn tuyệt đối.
 
 ## Dữ liệu
 
-| Tập | Số mẫu | Dùng cho |
+| File | Số mẫu | Dùng để |
 |---|---|---|
-| `data/train_pool.csv` | 2000 | Huấn luyện. Exp A lấy tập con lồng nhau `train_pool[:A]`; Exp B, C dùng `train_pool[:1000]` |
-| `data/val.csv` | 200 | Early stopping, lưu checkpoint, chọn mô hình |
-| `data/test.csv` | 100 | **Chỉ** đánh giá mô hình cuối, không dùng để chọn cấu hình |
+| data/train_pool.csv | 2000 | train. Exp A lấy `train_pool[:A]`, Exp B và C lấy `train_pool[:1000]` |
+| data/val.csv | 200 | early stopping, lưu checkpoint, chọn mô hình |
+| data/test.csv | 100 | chỉ để báo cáo kết quả, không dùng để chọn gì cả |
 
-- Mỗi file có 3 cột `x1, x2, y`, với `y = f(x1, x2)` không nhiễu.
-- `x1`, `x2` lấy đều trên miền. Ba tập là ba lần rút liên tiếp (train_pool → val → test) từ `numpy.random.default_rng(42)`. Không có điểm trùng giữa các tập.
-- `data/metadata.json` ghi seed, kích thước và mã MD5 của từng file CSV. Notebook sinh dữ liệu sẽ báo lỗi nếu CSV bị sửa.
-- Dữ liệu đã sinh **một lần** và commit. Không ai sinh lại; chạy lại `generate_data.ipynb` chỉ kiểm tra tính tái lập, không ghi đè.
+Mỗi file có 3 cột `x1, x2, y`. x1, x2 lấy ngẫu nhiên đều trong miền, y = f(x1, x2) không có nhiễu. Ba tập được rút lần lượt train_pool, val, test từ cùng một `np.random.default_rng(42)`.
 
-Đọc dữ liệu từ code khác:
+Dữ liệu chỉ sinh một lần rồi commit. Chạy lại `generate_data.ipynb` sẽ không ghi đè mà chỉ kiểm tra lại. MD5 của từng file nằm trong `data/metadata.json`.
+
+Lưu ý: NumPy không đảm bảo `default_rng` cho ra cùng dãy số ở mọi phiên bản, nên nếu máy khác báo không khớp thì cứ dùng file CSV đã commit.
+
+### Đọc dữ liệu trong notebook ở models/
 
 ```python
+import sys
+from pathlib import Path
+ROOT = Path.cwd() if (Path.cwd() / "preprocessing").is_dir() else Path.cwd().parent
+sys.path.insert(0, str(ROOT))
+
 from preprocessing.gaussian import load_split, gaussian_2d
-X_train, y_train = load_split("data/train_pool.csv")   # X: (n, 2), y: (n,)
+X_train, y_train = load_split(ROOT / "data" / "train_pool.csv")  # X: (n, 2), y: (n,)
 ```
 
-`gaussian_2d(X)` trả về giá trị thật của hàm, dùng để vẽ bề mặt thật hoặc heatmap lỗi.
+`load_split` trả về float64, đưa vào PyTorch thì đổi sang float32. `gaussian_2d(X)` tính giá trị thật của hàm, dùng khi vẽ bề mặt thật hoặc heatmap lỗi.
 
-## Cách chạy
+## Chạy
 
-Chạy từ thư mục gốc `BTL/`. Nếu lệnh `jupyter` không có trong PATH thì dùng `python -m nbconvert` như dưới đây.
+Chạy từ thư mục `tuan7/`:
 
-| Bước | Lệnh | Kết quả |
-|---|---|---|
-| 1. Sinh / kiểm tra dữ liệu | `python -m nbconvert --to notebook --execute --inplace preprocessing/generate_data.ipynb` | `data/*.csv`, `data/metadata.json` |
-| 2. EDA | `python -m nbconvert --to notebook --execute --inplace eda/eda.ipynb` | `eda/figures/*.png`, `eda/*.csv` |
-| 3. Exp A – số mẫu | `python -m nbconvert --to notebook --execute --inplace models/exp_A.ipynb` | `exps/exp_A/` |
-| 4. Exp B – số nơ-ron | `python -m nbconvert --to notebook --execute --inplace models/exp_B.ipynb` | `exps/exp_B/` |
-| 5. Exp C – số tầng | `python -m nbconvert --to notebook --execute --inplace models/exp_C.ipynb` | `exps/exp_C/` |
+```bash
+python -m nbconvert --to notebook --execute --inplace preprocessing/generate_data.ipynb   # sinh / kiểm tra dữ liệu
+python -m nbconvert --to notebook --execute --inplace eda/eda.ipynb                       # hình và bảng EDA
+python -m nbconvert --to notebook --execute --inplace models/exp_A.ipynb                  # Exp A -> exps/exp_A/
+python -m nbconvert --to notebook --execute --inplace models/exp_B.ipynb                  # Exp B -> exps/exp_B/
+python -m nbconvert --to notebook --execute --inplace models/exp_C.ipynb                  # Exp C -> exps/exp_C/
+```
 
-Bước 3–5 cần `models/mlp.py`, `models/train.py`, `models/experiment.py`. Tên notebook và thư mục kết quả theo phân công; người phụ trách cập nhật lại bảng này nếu đổi.
+Hoặc mở notebook bằng Jupyter / VS Code rồi Run All.
 
 ## Cấu hình baseline
 
 | Tham số | Giá trị |
 |---|---|
-| Seed dữ liệu | 42 |
-| Seed mô hình | 0, 1, 2 |
-| Chuẩn hoá input | `x1/2`, `x2/4` (đưa về [−1, 1]) |
-| Kiến trúc baseline | 1 tầng ẩn × 10 nơ-ron, tanh; tầng ra tuyến tính |
-| Loss, optimizer | `nn.MSELoss`, Adam, lr = 1e-3 |
-| Batch, epoch | 32; tối đa 1000 epoch, early stopping patience 100 theo val loss |
-| A baseline cho Exp B, C | 1000 |
+| Seed dữ liệu / mô hình | 42 / 0, 1, 2 |
+| Chuẩn hoá input | x1/2, x2/4 |
+| Mạng | 1 tầng ẩn 10 nơ-ron, tanh, tầng ra tuyến tính |
+| Loss, optimizer | MSELoss, Adam lr = 1e-3 |
+| Batch, epoch | 32, tối đa 1000 epoch, early stopping patience 100 theo val loss |
+| A cho Exp B, C | 1000 |
 
-## Mốc so sánh
+Để tham khảo: nếu chỉ đoán y bằng một hằng số (trung bình y của train) thì MSE khoảng 3.4e-3 trên train, 3.8e-3 trên val, 2.7e-3 trên test (`eda/constant_baseline.csv`).
 
-Dự đoán hằng số $\hat y = \bar y_{train}$ cho MSE ≈ 3.4e-3 trên train_pool, 3.8e-3 trên val và 2.7e-3 trên test (`eda/constant_baseline.csv`). Mọi cấu hình MLP phải có MSE thấp hơn hẳn mốc này.
-
-## Định dạng kết quả
+## Kết quả
 
 Mỗi lần chạy ghi một dòng vào `exps/exp_*/runs.csv`:
 
@@ -96,4 +88,4 @@ Mỗi lần chạy ghi một dòng vào `exps/exp_*/runs.csv`:
 exp,value,seed,train_mse,val_mse,test_mse,test_mae,test_rmse,best_epoch,train_time_s,n_params
 ```
 
-`summary.csv` là trung bình ± độ lệch chuẩn theo `value`. Kết quả nào không có log CSV đi kèm thì không đưa vào báo cáo.
+`summary.csv` là trung bình và độ lệch chuẩn theo `value`.
